@@ -1,0 +1,40 @@
+---
+title: "Meteorite Landings in the 21st Century"
+author: "Pedro Magalhães Bernardo"
+date: "February 12, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+This interactive map shows the meteorites that have fallen to Earth in the 21st Century. The data was collected by <a href="http://www.meteoriticalsociety.org/"> The Meteoritical Society </a> and can be found <a href="http://www.meteoriticalsociety.org/"> here </a>
+
+This was created using the <a href="https://cran.r-project.org/web/packages/leaflet/leaflet.pdf"> leaflet </a> package in R.
+
+```{r, echo=FALSE, message=FALSE}
+library(dplyr)
+library(leaflet)
+
+data <- read.csv("meteorite-landings.csv")
+
+data <- na.omit(data[, c("name","year", "reclat", "reclong")])
+
+data <- data %>% 
+  filter(year>=2001 & year<=2016) %>%
+  filter(reclong<=180 & reclong>=-180 & (reclat!=0 | reclong!=0))
+
+data <- data[, c("name", "reclat", "reclong")]
+
+data <- rename(data, lat=reclat, lng=reclong)
+
+myMap <- data %>% 
+  leaflet() %>%
+  addTiles() %>%
+  addMarkers(clusterOptions = markerClusterOptions(),
+             popup = data$name)
+myMap
+
+```
